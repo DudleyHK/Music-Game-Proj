@@ -43,16 +43,11 @@ public class PlayerMovement : MonoBehaviour
 			{
 					if(onChangeSpeed != null)
 						onChangeSpeed(SpeedChangeType.Accelerate, vert);
-
-					//Debug.Log("onChangeSpeed(Accelerate, " + vert + ")");
 			}
 			else if(vert < 0)
 			{
 					if(onChangeSpeed != null)
 						onChangeSpeed(SpeedChangeType.Deccelerate, vert);
-
-						//Debug.Log("onChangeSpeed(Accelerate, " + vert + ")");
-
 			}
 		}
 }

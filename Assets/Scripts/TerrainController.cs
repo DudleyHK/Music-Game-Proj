@@ -7,6 +7,7 @@ public class TerrainController : MonoBehaviour
 	public GameObject RoadPrefab;
 	public Vector3 InstantiationPosition;
 	public List<Road> RoadPieces = new List<Road>();
+	public float Speed = 10f;
 
 	public float CoolDown = 1f;
 	public float timer = 0f;
@@ -23,29 +24,26 @@ public class TerrainController : MonoBehaviour
 
 	private	void Update()
 	{
-		if(timer <= 0)
-		{
 				foreach(var road in RoadPieces)
 				{
 					if(Vector3.Distance(road.transform.position, new Vector3(0f, 0f, -515.7f)) < 5f)
 						{
-								Debug.Log("Instantiate");
+							if(RoadPieces.Count <= 3)
+							{
 								var nr = Instantiate(RoadPrefab, InstantiationPosition, RoadPrefab.transform.rotation).GetComponent<Road>();
 
-								nr.Rigidbody.velocity = transform.forward * 10f * Time.fixedDeltaTime;
+								nr.Rigidbody.velocity = RoadPieces[0].Rigidbody.velocity;
 
 								RoadPieces.Add(nr);
 
-								timer = CoolDown;
+								Destroy(road.gameObject);
+								RoadPieces.Remove(road);
+
 
 								break;
 							}
-					}
-		}
-		else
-		{
-				timer -= Time.deltaTime;
-		}
+						}
+				}
 	}
 
 
@@ -54,7 +52,11 @@ public class TerrainController : MonoBehaviour
 	{
 		foreach(var road in RoadPieces)
 		{
-				road.Rigidbody.velocity -= transform.forward * 10f * Time.fixedDeltaTime;
+			if(_type == PlayerMovement.SpeedChangeType.Accelerate)
+				road.Rigidbody.velocity -= transform.forward * Speed * Time.fixedDeltaTime;
+
+				if(_type == PlayerMovement.SpeedChangeType.Deccelerate)
+					road.Rigidbody.velocity += transform.forward * Speed * Time.fixedDeltaTime;
 		}
 	}
 
