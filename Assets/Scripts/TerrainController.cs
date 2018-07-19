@@ -12,6 +12,9 @@ public class TerrainController : MonoBehaviour
 	public float CoolDown = 1f;
 	public float timer = 0f;
 
+
+
+
 	private void OnEnable()
 	{
 			PlayerMovement.onChangeSpeed += OnChangeSpeed;
@@ -21,6 +24,8 @@ public class TerrainController : MonoBehaviour
 	{
 			PlayerMovement.onChangeSpeed += OnChangeSpeed;
 	}
+
+
 
 	private	void Update()
 	{
