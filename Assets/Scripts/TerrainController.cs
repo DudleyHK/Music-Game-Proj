@@ -37,7 +37,7 @@ public class TerrainController : MonoBehaviour
 							{
 								var nr = Instantiate(RoadPrefab, InstantiationPosition, RoadPrefab.transform.rotation).GetComponent<Road>();
 
-								nr.Rigidbody.velocity = RoadPieces[0].Rigidbody.velocity;
+								nr.rb.velocity = RoadPieces[0].rb.velocity;
 
 								RoadPieces.Add(nr);
 
@@ -58,10 +58,10 @@ public class TerrainController : MonoBehaviour
 		foreach(var road in RoadPieces)
 		{
 			if(_type == PlayerMovement.SpeedChangeType.Accelerate)
-				road.Rigidbody.velocity -= transform.forward * Speed * Time.fixedDeltaTime;
+				road.rb.velocity -= transform.forward * Speed * Time.fixedDeltaTime;
 
 				if(_type == PlayerMovement.SpeedChangeType.Deccelerate)
-					road.Rigidbody.velocity += transform.forward * Speed * Time.fixedDeltaTime;
+					road.rb.velocity += transform.forward * Speed * Time.fixedDeltaTime;
 		}
 	}
 
