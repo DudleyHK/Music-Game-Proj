@@ -39,10 +39,9 @@ public class TileRoads : MonoBehaviour
 
     private void Update()
     {
+        // TODO: attach to previous planes min/ max bounds of plane
         if(Vector3.Distance(tileRoads[tileRoads.Count - 1].transform.position, genPos) <= 0.1f)
-        {
             GenerateTile(initPos);
-        }
     }
 
 
