@@ -10,18 +10,28 @@ public class Road : MonoBehaviour
     public float Speed;
 
     [HideInInspector] public Rigidbody rb;
+    [HideInInspector] public Bounds bounds;
+    [HideInInspector] public MeshFilter mf;
+
 
 
 
 
     // Use this for initialization
-    void Awake()
+    private void Awake()
     {
         rb = GetComponent<Rigidbody>();
+        bounds = GetComponent<Renderer>().bounds;
+        mf = GetComponent<MeshFilter>();
     }
 
-    // Update is called once per frame
-    void FixedUpdate()
+    private void Start()
+    {
+         
+    }
+
+
+    private void FixedUpdate()
     {
         rb.velocity -= transform.forward * Speed * Time.fixedDeltaTime;
     }

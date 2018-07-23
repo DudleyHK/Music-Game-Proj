@@ -22,7 +22,7 @@ GameObject:
   - component: {fileID: 33468681307121558}
   - component: {fileID: 23127826931713496}
   m_Layer: 0
-  m_Name: Sky sml
+  m_Name: Sky
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
