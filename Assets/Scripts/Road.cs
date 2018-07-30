@@ -18,12 +18,14 @@ public class Road : MonoBehaviour
 
 
     // Use this for initialization
-    private void Awake()
+    private void OnEnable()
     {
         rb = GetComponent<Rigidbody>();
-        bounds = GetComponent<Renderer>().bounds;
         mf = GetComponent<MeshFilter>();
+
+        //bounds = mf.sharedMesh.bounds;
     }
+
 
     private void Start()
     {
@@ -33,8 +35,9 @@ public class Road : MonoBehaviour
 
     private void FixedUpdate()
     {
-        rb.velocity -= transform.forward * Speed * Time.fixedDeltaTime;
+        //rb.velocity -= transform.forward * Speed * Time.fixedDeltaTime;
     }
+
 
 
     private void OnTriggerEnter(Collider other)

@@ -3,20 +3,18 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
+/// <summary>
 
-
+/// </summary>
 public class GenerateMesh : ScriptableObject
 {
-    public static List<GameObject> meshes = new List<GameObject>();
-
     private static Vector3 initialPos = new Vector3(0, 0, -250);
 
 
-    public static GameObject CreatePlane(float _width, float _length, Material _mat)
+    public static GameObject CreatePlane(GameObject _tilePrefab, Material _mat, float _width, float _length)
     {
-        var go = new GameObject("Plane");
-        var mf = go.AddComponent<MeshFilter>();
-        var mr = go.AddComponent<MeshRenderer>();
+        var mf = _tilePrefab.GetComponent<MeshFilter>();
+        var mr = _tilePrefab.GetComponent<MeshRenderer>();
 
         var mesh = new Mesh();
 
@@ -40,38 +38,36 @@ public class GenerateMesh : ScriptableObject
 
         mf.mesh = mesh;
 
-        go.AddComponent<BoxCollider>();
-        go.AddComponent<Rigidbody>();
-
-
         mr.material = _mat;
 
         mesh.RecalculateBounds();
         mesh.RecalculateNormals();
 
-        meshes.Add(go);
-        return go;
+
+        // TODO: Create object factory for RoadTiles which calls this fuction. 
+        //         - RoadTileFactory adds the required Components.
+        _tilePrefab.AddComponent<BoxCollider>();
+
+
+        return _tilePrefab;
     }
 
 
 
-    public static GameObject AttachPlane(float _width, float _length, Material _mat)
+    public static GameObject AttachPlane(GameObject _tilePrefab, Material _mat, Mesh _prevMesh, float _width, float _length)
     {
-        var last = meshes[meshes.Count - 1].GetComponent<MeshFilter>().mesh;
-        
-        var go = new GameObject("Plane");
-        var mf = go.AddComponent<MeshFilter>();
-        var mr = go.AddComponent<MeshRenderer>();
+        var mf = _tilePrefab.GetComponent<MeshFilter>();
+        var mr = _tilePrefab.GetComponent<MeshRenderer>();
 
         var mesh = new Mesh();
 
 
         mesh.vertices = new Vector3[]
         {
-           new Vector3(last.vertices[0].x, 0, last.vertices[0].z + _length),
-           new Vector3(_width, 0, last.vertices[0].z + _length),
-           new Vector3(_width, 0, last.vertices[0].z + (_length * 2)),
-           new Vector3(0, 0,  last.vertices[0].z + (_length * 2))
+           new Vector3(_prevMesh.vertices[0].x, 0, _prevMesh.vertices[0].z + _length),
+           new Vector3(_width, 0, _prevMesh.vertices[0].z + _length),
+           new Vector3(_width, 0, _prevMesh.vertices[0].z + (_length * 2)),
+           new Vector3(0, 0,  _prevMesh.vertices[0].z + (_length * 2))
         };
 
         mesh.uv = new Vector2[]
@@ -86,28 +82,18 @@ public class GenerateMesh : ScriptableObject
 
         mf.mesh = mesh;
 
-        go.AddComponent<BoxCollider>();
-        go.AddComponent<Rigidbody>();
-
         mr.material = _mat;
 
 
         mesh.RecalculateBounds();
         mesh.RecalculateNormals();
 
-        meshes.Add(go);
 
 
+        // TODO: Create object factory for RoadTiles which calls this fuction. 
+        //         - RoadTileFactory adds the required Components.
+        _tilePrefab.AddComponent<BoxCollider>();
 
-        return default(GameObject);
-    }
-
-
-
-    public static void RemoveAt(int i)
-    {
-        Debug.Log(" dsd ");
-        Destroy(meshes[i]);
-        meshes.RemoveAt(i);
+        return _tilePrefab;
     }
 }
