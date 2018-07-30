@@ -51,12 +51,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 79208619bef1d474f80f5341b58700f1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: {x: 0, y: 0, z: 0}
-  vel: {x: 0, y: 0, z: 0}
-  pos: {x: 0, y: 0, z: 0}
-  acc: {x: 0, y: 0, z: 0}
-  dtSpeed: {x: 0, y: 0, z: 0}
-  dtVel: {x: 0, y: 0, z: 0}
   tiles: []
   tilePrefab: {fileID: 1427307332584748, guid: ab1f4331f50ed0c4d9c9c474a9fe2cb3, type: 2}
   road: {fileID: 2100000, guid: f1140ee13409168438c76d63119e8fde, type: 2}
+  EnginePower: 15
+  BrakePower: 3
+  Drag: 0.1
+  RR: 0.5
+  Mass: 5
+  acc: {x: 0, y: 0, z: 0}
+  brake: {x: 0, y: 0, z: 0}
+  vel: {x: 0, y: 0, z: 0}
+  dtvel: {x: 0, y: 0, z: 0}
+  dtspeed: {x: 0, y: 0, z: 0}
+  speed: 0
+  lf: {x: 0, y: 0, z: 0}
+  traction: {x: 0, y: 0, z: 0}
+  drag: {x: 0, y: 0, z: 0}
+  rr: {x: 0, y: 0, z: 0}
+  turn: 0
+  gas: 0

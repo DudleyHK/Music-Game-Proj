@@ -15,26 +15,57 @@ public enum InputDir
 
 public class GenerateOnStart : MonoBehaviour
 {
-    public Vector3 speed, vel, pos;
-    public Vector3 acc, dtSpeed, dtVel;
-
-    public List<GameObject> tiles;
+    public List<Road> rdTiles;
     public GameObject tilePrefab;
     public Material road;
+
+
+    [Header("Physics Vars")]
+    public float EnginePower;
+    public float BrakePower;
+    public float Drag;
+    public float RR; // Rolling Resistance... This must be 30times the value of Drag
+    public float Mass; // in KG
+
+
+    [Header("Helpers")]
+    public Vector3 acc; // Meters per sec
+    public Vector3 brake;
+    public Vector3 vel;
+    public Vector3 dtvel;
+    public Vector3 dtspeed;
+    public float speed;
+
+    [Space]
+
+    public Vector3 lf; // longitudinal force in Newtons
+    public Vector3 traction;
+    public Vector3 drag;
+    public Vector3 rr; // rolling resistance
+
+    [Space]
+
+
+
+    public float turn;
+    public float gas;
+
 
 
     // Use this for initialization
     private void Start()
     {
+        var startTiles = new Road[3];
 
-        var startTiles = new GameObject[3];
+        startTiles[0] = GenerateMesh.CreatePlane(Instantiate(tilePrefab, Vector3.zero, Quaternion.identity), road, 30, 10).GetComponent<Road>();
 
-        startTiles[0] = GenerateMesh.CreatePlane(Instantiate(tilePrefab, Vector3.zero, Quaternion.identity), road, 30, 10);
+        startTiles[1] = GenerateMesh.AttachPlane(
+            Instantiate(tilePrefab, Vector3.zero, Quaternion.identity), road, startTiles[0].GetComponent<MeshFilter>().sharedMesh, 30, 10).GetComponent<Road>();
 
-        startTiles[1] = GenerateMesh.AttachPlane(Instantiate(tilePrefab, Vector3.zero, Quaternion.identity), road, startTiles[0].GetComponent<MeshFilter>().sharedMesh, 30, 10);
-        startTiles[2] = GenerateMesh.AttachPlane(Instantiate(tilePrefab, Vector3.zero, Quaternion.identity), road, startTiles[1].GetComponent<MeshFilter>().sharedMesh, 30, 10);
+        startTiles[2] = GenerateMesh.AttachPlane(
+            Instantiate(tilePrefab, Vector3.zero, Quaternion.identity), road, startTiles[1].GetComponent<MeshFilter>().sharedMesh, 30, 10).GetComponent<Road>();
 
-        tiles = new List<GameObject>(startTiles);
+        rdTiles = new List<Road>(startTiles);
     }
 
 
@@ -43,58 +74,115 @@ public class GenerateOnStart : MonoBehaviour
     void Update()
     {
         PlayerInput();
-        ApplyPhysics(Vector3.forward, 0.5f);
 
+        GenerateRoad();
+    }
 
-       // if(tiles[0].transform.position.z <= -50)
-       // {
-       //     tiles.Add(GenerateMesh.AttachPlane(
-       //         Instantiate(tilePrefab, Vector3.zero, Quaternion.identity),
-       //         road, tiles[tiles.Count - 1].GetComponent<MeshFilter>().sharedMesh, 30, 10));
-       //
-       //     Destroy(tiles[0]);
-       //     tiles.RemoveAt(0);
-       // }
+    private void FixedUpdate()
+    {
+        MoveTiles(gas);
     }
 
 
     private void PlayerInput()
     {
-        var hor = Input.GetAxis("Horizontal");
-        var vert = Input.GetAxis("Vertical");
+        turn = Input.GetAxis("Horizontal");
+        gas = Input.GetAxis("Vertical");
 
-        //if(hor > 0)
-        //    ApplyPhysics(Vector3.right, hor);
-        //if(hor < 0)
-        //    ApplyPhysics(Vector3.left, hor);
-        //if(vert > 0)
-        //    ApplyPhysics(Vector3.forward, vert);
-        //if(vert < 0)
-        //    ApplyPhysics(Vector3.back, vert);
     }
 
 
-    private void ApplyPhysics(Vector3 _dir, float _val)
+    private void MoveTiles(float _gas)
     {
-        for(int i = 0; i < tiles.Count; i++)
+        foreach(var road in rdTiles)
         {
-            var ms = tiles[i].GetComponent<MeshFilter>().mesh;
+            var vertices = road.mf.mesh.vertices;
 
-            var nmesh = ms;
-
-            for(int j = 0; j < nmesh.vertices.Length; i++)
+            for(int i = 0; i < vertices.Length; i++)
             {
-                var v = nmesh.vertices[j];
+                var vertex = vertices[i];
 
-                v += _dir * (_val * 1000f) * Time.deltaTime;
+                vertex = ApplyPhysics(vertex, _gas);
 
-                ms.vertices[j] = new Vector3(v.x, v.y, v.x);
-
-                Debug.Log("Vertex " + j + " position is - " + ms.vertices[i]);
+                vertices[i] = vertex;
             }
 
-            ms = nmesh;
-            
+            road.mf.mesh.vertices = vertices;
+
+            road.mf.mesh.RecalculateNormals();
+            road.mf.mesh.RecalculateBounds();
+        }
+    }
+
+
+    private Vector3 ApplyPhysics(Vector3 _vertex, float _gas)
+    {
+        var pos = _vertex;
+
+        lf = LongitudalForce(_gas);
+
+        acc = lf / Mass;
+
+        dtvel = acc * Time.deltaTime;
+        vel += dtvel;
+
+        dtspeed = vel * Time.deltaTime;
+        pos += dtspeed;
+
+        speed = vel.magnitude;
+
+        return pos;
+    }
+
+
+    private Vector3 LongitudalForce(float _gas)
+    {
+        // Calculate Forces.
+        if(_gas > 0)
+        {
+            traction = Vector3.back * (EnginePower * _gas);
+        }
+        else if(_gas < 0)
+        {
+            traction = Vector3.back * (BrakePower * _gas);
+        }
+        else
+        {
+            traction = Vector3.back * _gas;
+        }
+
+        drag = -Drag * vel * speed;
+        rr = -RR * vel;
+
+        lf = traction + drag + rr;
+
+        return lf;
+    }
+
+
+    private void GenerateRoad()
+    {
+        for(int i = 0; i < rdTiles.Count; i++)
+        {
+            var vertices = rdTiles[i].mf.mesh.vertices;
+
+            for(int j = 0; j < vertices.Length; j++)
+            {
+                var vertex = vertices[j];
+
+                //Debug.Log("(" + i + ", " + j + ") - " + vertex);
+
+                if(vertex.z < -300)
+                {
+                    rdTiles.Add(GenerateMesh.AttachPlane(
+                        Instantiate(tilePrefab, Vector3.zero, Quaternion.identity), road, 
+                        rdTiles[rdTiles.Count - 1].mf.sharedMesh, 30, 10).GetComponent<Road>());
+
+
+                    Destroy(rdTiles[0].gameObject);
+                    rdTiles.RemoveAt(0);
+                }
+            }
         }
     }
 }

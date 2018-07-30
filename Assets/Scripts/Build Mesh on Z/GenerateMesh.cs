@@ -43,12 +43,6 @@ public class GenerateMesh : ScriptableObject
         mesh.RecalculateBounds();
         mesh.RecalculateNormals();
 
-
-        // TODO: Create object factory for RoadTiles which calls this fuction. 
-        //         - RoadTileFactory adds the required Components.
-        _tilePrefab.AddComponent<BoxCollider>();
-
-
         return _tilePrefab;
     }
 
@@ -84,15 +78,8 @@ public class GenerateMesh : ScriptableObject
 
         mr.material = _mat;
 
-
-        mesh.RecalculateBounds();
-        mesh.RecalculateNormals();
-
-
-
-        // TODO: Create object factory for RoadTiles which calls this fuction. 
-        //         - RoadTileFactory adds the required Components.
-        _tilePrefab.AddComponent<BoxCollider>();
+        mf.mesh.RecalculateBounds();
+        mf.mesh.RecalculateNormals();
 
         return _tilePrefab;
     }
