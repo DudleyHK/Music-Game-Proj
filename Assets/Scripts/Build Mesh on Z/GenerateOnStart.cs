@@ -18,6 +18,7 @@ public class GenerateOnStart : MonoBehaviour
     public List<Road> rdTiles;
     public GameObject tilePrefab;
     public Material road;
+    private float killZ = -260;
 
 
     [Header("Physics Vars")]
@@ -46,7 +47,6 @@ public class GenerateOnStart : MonoBehaviour
     [Space]
 
 
-
     public float turn;
     public float gas;
 
@@ -55,7 +55,7 @@ public class GenerateOnStart : MonoBehaviour
     // Use this for initialization
     private void Start()
     {
-        var startTiles = new Road[3];
+        var startTiles = new Road[5];
 
         startTiles[0] = GenerateMesh.CreatePlane(Instantiate(tilePrefab, Vector3.zero, Quaternion.identity), road, 30, 10).GetComponent<Road>();
 
@@ -64,6 +64,12 @@ public class GenerateOnStart : MonoBehaviour
 
         startTiles[2] = GenerateMesh.AttachPlane(
             Instantiate(tilePrefab, Vector3.zero, Quaternion.identity), road, startTiles[1].GetComponent<MeshFilter>().sharedMesh, 30, 10).GetComponent<Road>();
+
+        startTiles[3] = GenerateMesh.AttachPlane(
+            Instantiate(tilePrefab, Vector3.zero, Quaternion.identity), road, startTiles[2].GetComponent<MeshFilter>().sharedMesh, 30, 10).GetComponent<Road>();
+
+        startTiles[4] = GenerateMesh.AttachPlane(
+            Instantiate(tilePrefab, Vector3.zero, Quaternion.identity), road, startTiles[3].GetComponent<MeshFilter>().sharedMesh, 30, 10).GetComponent<Road>();
 
         rdTiles = new List<Road>(startTiles);
     }
@@ -162,26 +168,21 @@ public class GenerateOnStart : MonoBehaviour
 
     private void GenerateRoad()
     {
-        for(int i = 0; i < rdTiles.Count; i++)
+        var vertices = rdTiles[0].mf.mesh.vertices;
+
+        for(int j = 0; j < vertices.Length; j++)
         {
-            var vertices = rdTiles[i].mf.mesh.vertices;
+            var vertex = vertices[j];
 
-            for(int j = 0; j < vertices.Length; j++)
+            if(vertex.z < killZ)
             {
-                var vertex = vertices[j];
+                rdTiles.Add(GenerateMesh.AttachPlane(
+                    Instantiate(tilePrefab, Vector3.zero, Quaternion.identity), road,
+                    rdTiles[rdTiles.Count - 1].mf.sharedMesh, 30, 10).GetComponent<Road>());
 
-                //Debug.Log("(" + i + ", " + j + ") - " + vertex);
-
-                if(vertex.z < -300)
-                {
-                    rdTiles.Add(GenerateMesh.AttachPlane(
-                        Instantiate(tilePrefab, Vector3.zero, Quaternion.identity), road, 
-                        rdTiles[rdTiles.Count - 1].mf.sharedMesh, 30, 10).GetComponent<Road>());
-
-
-                    Destroy(rdTiles[0].gameObject);
-                    rdTiles.RemoveAt(0);
-                }
+                Destroy(rdTiles[0].gameObject);
+                rdTiles.RemoveAt(0);
+                return;
             }
         }
     }
